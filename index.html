@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AquaSense — Calidad del Agua en el Perú</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --azul:      #1a6fc4;
+  --azul-osc:  #0f4d8a;
+  --azul-pale: #e8f2fb;
+  --verde:     #16a34a;
+  --verde-pale:#dcfce7;
+  --amarillo:  #d97706;
+  --amar-pale: #fef3c7;
+  --rojo:      #dc2626;
+  --rojo-pale: #fee2e2;
+  --bg:        #f0f5fb;
+  --card:      #ffffff;
+  --borde:     #dde6f0;
+  --texto:     #0f1f35;
+  --sub:       #5b7291;
+  --radius:    14px;
+  --shadow:    0 2px 16px rgba(15,31,53,.08);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--texto);min-height:100vh}
+
+/* NAV */
+nav{
+  background:#fff;border-bottom:1px solid var(--borde);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 2rem;height:62px;position:sticky;top:0;z-index:200;
+  box-shadow:0 1px 8px rgba(15,31,53,.06);
+}
+.logo{display:flex;align-items:center;gap:.55rem;text-decoration:none;color:var(--azul)}
+.logo-icon{width:32px;height:32px;background:linear-gradient(135deg,#1a6fc4,#38bdf8);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.logo-icon svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2.2}
+.logo-text{font-family:'Playfair Display',serif;font-size:1.3rem}
+.nav-pill{font-size:.72rem;background:var(--azul-pale);color:var(--azul);padding:.22rem .7rem;border-radius:20px;font-weight:600}
+
+/* HERO */
+.hero{
+  background:linear-gradient(140deg,#0f4d8a 0%,#1a6fc4 55%,#2d9fe3 100%);
+  color:#fff;padding:3.5rem 2rem 5rem;text-align:center;
+  position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 20% 50%,rgba(255,255,255,.06) 0%,transparent 60%),
+             radial-gradient(circle at 80% 20%,rgba(56,189,248,.15) 0%,transparent 50%);
+}
+.hero-content{position:relative;z-index:1}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(1.9rem,5vw,3rem);line-height:1.15;margin-bottom:.9rem}
+.hero p{font-size:.97rem;opacity:.85;max-width:520px;margin:0 auto 1.8rem;line-height:1.7}
+.hero-chips{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap}
+.hero-chip{background:rgba(255,255,255,.15);backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.25);padding:.3rem .85rem;border-radius:20px;font-size:.75rem;font-weight:500}
+
+/* SEARCH FLOTANTE */
+.search-float{
+  max-width:700px;margin:-2.5rem auto 0;
+  background:#fff;border-radius:var(--radius);
+  box-shadow:0 8px 32px rgba(15,31,53,.14);
+  padding:1.4rem 1.6rem;position:relative;z-index:10;
+}
+.search-float label{display:block;font-size:.78rem;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.6rem}
+.search-row{display:flex;gap:.8rem;flex-wrap:wrap}
+.search-row select{
+  flex:1;min-width:200px;border:1.5px solid var(--borde);border-radius:9px;
+  padding:.6rem 1rem;font-family:inherit;font-size:.9rem;
+  color:var(--texto);background:#fff;cursor:pointer;transition:border-color .2s;
+}
+.search-row select:focus{outline:none;border-color:var(--azul)}
+.btn-primary{
+  background:linear-gradient(135deg,var(--azul),#2d9fe3);
+  color:#fff;border:none;border-radius:9px;
+  padding:.6rem 1.4rem;font-family:inherit;font-size:.9rem;font-weight:600;
+  cursor:pointer;transition:opacity .2s,transform .1s;white-space:nowrap;
+}
+.btn-primary:hover{opacity:.9;transform:translateY(-1px)}
+.btn-secondary{
+  background:#fff;color:var(--azul);border:1.5px solid var(--azul);border-radius:9px;
+  padding:.6rem 1.2rem;font-family:inherit;font-size:.9rem;font-weight:600;
+  cursor:pointer;transition:background .2s;white-space:nowrap;
+}
+.btn-secondary:hover{background:var(--azul-pale)}
+
+/* MAIN */
+main{max-width:940px;margin:2rem auto;padding:0 1.2rem 4rem}
+
+/* LEYENDA */
+.leyenda{
+  background:#fff;border:1px solid var(--borde);border-radius:var(--radius);
+  padding:1rem 1.4rem;margin-bottom:1.6rem;
+  display:flex;align-items:center;gap:1.4rem;flex-wrap:wrap;
+}
+.ley-title{font-size:.72rem;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em}
+.ley-items{display:flex;gap:1.2rem;flex-wrap:wrap}
+.ley-item{display:flex;align-items:center;gap:.45rem;font-size:.8rem}
+.dot{width:9px;height:9px;border-radius:50%}
+.dv{background:var(--verde)}.da{background:var(--amarillo)}.dr{background:var(--rojo)}
+
+/* ZONA CARD */
+.zona-card{
+  background:var(--card);border:1px solid var(--borde);
+  border-radius:var(--radius);overflow:hidden;margin-bottom:2rem;
+  box-shadow:var(--shadow);animation:slideUp .45s ease both;
+}
+@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+.zc-header{
+  padding:1.3rem 1.5rem;display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;
+  border-bottom:1px solid var(--borde);
+  background:linear-gradient(135deg,#f7fbff 0%,#fff 100%);
+}
+.zc-title{font-family:'Playfair Display',serif;font-size:1.25rem}
+.zc-sub{font-size:.79rem;color:var(--sub);margin-top:.2rem}
+.badge{display:inline-flex;align-items:center;gap:.3rem;padding:.28rem .8rem;border-radius:20px;font-size:.75rem;font-weight:700;flex-shrink:0}
+.badge-v{background:var(--verde-pale);color:#14532d}
+.badge-a{background:var(--amar-pale);color:#78350f}
+.badge-r{background:var(--rojo-pale);color:#7f1d1d}
+
+.params-grid{display:grid;grid-template-columns:repeat(4,1fr)}
+@media(max-width:620px){.params-grid{grid-template-columns:repeat(2,1fr)}}
+.param{padding:1.1rem 1.3rem;border-right:1px solid var(--borde);border-bottom:1px solid var(--borde)}
+.param:nth-child(4n){border-right:none}
+.param-lbl{font-size:.7rem;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.3rem}
+.param-val{font-size:1.3rem;font-weight:700;line-height:1}
+.param-unit{font-size:.75rem;font-weight:400;color:var(--sub)}
+.param-track{height:5px;background:#eef1f5;border-radius:3px;margin-top:.5rem}
+.param-fill{height:5px;border-radius:3px;transition:width .6s ease}
+
+.zc-nota{
+  padding:.85rem 1.5rem;font-size:.82rem;color:#374151;
+  background:#fafcff;border-bottom:1px solid var(--borde);line-height:1.6;
+}
+
+/* INFO EXTRA */
+.info-extra{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));border-bottom:1px solid var(--borde)}
+.info-item{padding:1rem 1.3rem;border-right:1px solid var(--borde)}
+.info-item:last-child{border-right:none}
+.info-item-icon{font-size:1.3rem;margin-bottom:.35rem}
+.info-item-label{font-size:.7rem;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.2rem}
+.info-item-val{font-size:.88rem;font-weight:600;color:var(--texto);line-height:1.4}
+.info-item-desc{font-size:.76rem;color:var(--sub);margin-top:.15rem;line-height:1.4}
+
+/* GALERÍA */
+.gallery-section{border-bottom:1px solid var(--borde);padding:1.2rem 1.5rem}
+.section-title{font-size:.75rem;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.9rem;display:flex;align-items:center;gap:.5rem}
+.gallery-frame{
+  width:100%;height:220px;border-radius:10px;overflow:hidden;
+  background:#e8f0fa;position:relative;
+}
+.gallery-frame img{width:100%;height:100%;object-fit:cover;display:block}
+.gallery-fallback{
+  width:100%;height:100%;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:.6rem;
+  background:linear-gradient(135deg,#c8dff5,#9fc5e8);color:#2c5f8a;
+}
+.gallery-fallback svg{width:40px;height:40px;opacity:.45}
+.gallery-fallback span{font-size:.82rem;font-weight:500;opacity:.7}
+.gallery-year-badge{
+  position:absolute;top:.7rem;left:.7rem;
+  background:rgba(0,0,0,.55);backdrop-filter:blur(4px);
+  color:#fff;padding:.25rem .7rem;border-radius:20px;font-size:.75rem;font-weight:700;
+}
+.gallery-nav{display:flex;justify-content:space-between;align-items:center;margin-top:.7rem}
+.nav-btn{
+  background:#fff;border:1.5px solid var(--borde);border-radius:8px;
+  width:36px;height:36px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:1rem;color:var(--azul);transition:background .2s,border-color .2s;
+}
+.nav-btn:hover{background:var(--azul-pale);border-color:var(--azul)}
+.nav-btn:disabled{opacity:.3;cursor:not-allowed}
+.gallery-dots{display:flex;gap:.4rem}
+.gdot{width:7px;height:7px;border-radius:50%;background:var(--borde);cursor:pointer;transition:background .2s}
+.gdot.active{background:var(--azul)}
+.gallery-caption{font-size:.76rem;color:var(--sub);text-align:center;flex:1}
+
+/* GRÁFICAS */
+.charts-section{padding:1.2rem 1.5rem;border-bottom:1px solid var(--borde)}
+.chart-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:.9rem}
+.chart-param-label{font-size:.85rem;font-weight:700;color:var(--texto)}
+.chart-arrows{display:flex;gap:.5rem}
+.chart-wrap{position:relative;height:200px}
+
+/* FOOTER CARD */
+.zc-footer{
+  padding:.75rem 1.5rem;font-size:.74rem;color:var(--sub);
+  display:flex;justify-content:space-between;flex-wrap:wrap;gap:.4rem;background:#fafcff;
+}
+.zc-footer a{color:var(--azul);text-decoration:none}
+.zc-footer a:hover{text-decoration:underline}
+
+/* EDU */
+.edu{
+  background:#fff;border:1px solid var(--borde);border-radius:var(--radius);
+  padding:1.6rem 1.5rem;margin-top:2rem;box-shadow:var(--shadow);
+}
+.edu h2{font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:1rem}
+.edu-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.9rem}
+.edu-item{background:var(--bg);border-radius:10px;padding:1rem}
+.edu-item h4{font-size:.87rem;font-weight:700;margin-bottom:.35rem}
+.edu-item p{font-size:.78rem;color:var(--sub);line-height:1.55}
+
+/* EMPTY */
+.empty{text-align:center;padding:3.5rem 1rem;color:var(--sub)}
+.empty svg{opacity:.2;margin-bottom:1rem}
+.empty p{font-size:.95rem}
+
+/* FOOTER PAGE */
+footer{text-align:center;padding:1.5rem;font-size:.75rem;color:var(--sub);border-top:1px solid var(--borde);background:#fff}
+footer strong{color:var(--azul)}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="#">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6 8 3 12.5 3 16a9 9 0 0018 0c0-3.5-3-8-9-14z"/></svg>
+    </div>
+    <span class="logo-text">AquaSense</span>
+  </a>
+  <span class="nav-pill">Prototipo · Mayo 2026</span>
+</nav>
+
+<div class="hero">
+  <div class="hero-content">
+    <h1>Calidad del agua en el Perú,<br>en lenguaje simple</h1>
+    <p>Consulta datos oficiales de pH, turbidez, conductividad y temperatura de los principales ríos y lagos del país. Completamente gratuito.</p>
+    <div class="hero-chips">
+      <span class="hero-chip">✓ Datos ANA y MINAM</span>
+      <span class="hero-chip">✓ Acceso gratuito</span>
+      <span class="hero-chip">✓ Sin registro</span>
+      <span class="hero-chip">✓ Histórico 7 años</span>
+    </div>
+  </div>
+</div>
+
+<div style="padding:0 1.2rem">
+  <div class="search-float">
+    <label>¿Qué zona quieres consultar?</label>
+    <div class="search-row">
+      <select id="zonaSelect">
+        <option value="">— Selecciona una zona —</option>
+        <option value="rimac">Río Rímac (Lima)</option>
+        <option value="titicaca">Lago Titicaca (Puno)</option>
+        <option value="mantaro">Río Mantaro (Junín)</option>
+        <option value="chillon">Río Chillón (Lima)</option>
+      </select>
+      <button class="btn-primary" onclick="mostrarZona()">Ver datos</button>
+      <button class="btn-secondary" onclick="mostrarTodas()">Ver todas</button>
+    </div>
+  </div>
+</div>
+
+<main>
+  <div class="leyenda">
+    <span class="ley-title">Estado</span>
+    <div class="ley-items">
+      <div class="ley-item"><div class="dot dv"></div><span><strong>Seguro</strong> — dentro del rango ECA</span></div>
+      <div class="ley-item"><div class="dot da"></div><span><strong>Revisar</strong> — en límite o ligeramente elevado</span></div>
+      <div class="ley-item"><div class="dot dr"></div><span><strong>Peligro</strong> — supera los ECA del MINAM</span></div>
+    </div>
+  </div>
+
+  <div id="resultados">
+    <div class="empty">
+      <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+        <path d="M12 2C6 8 3 12.5 3 16a9 9 0 0018 0c0-3.5-3-8-9-14z"/>
+      </svg>
+      <p>Selecciona una zona para ver los datos de calidad del agua.</p>
+    </div>
+  </div>
+
+  <div class="edu">
+    <h2>¿Qué mide AquaSense?</h2>
+    <div class="edu-grid">
+      <div class="edu-item">
+        <h4>🔬 pH</h4>
+        <p>Mide la acidez o alcalinidad del agua. El rango seguro para uso ambiental es <strong>6.5 – 8.5</strong> según el DS N.° 004-2017-MINAM.</p>
+      </div>
+      <div class="edu-item">
+        <h4>💧 Turbidez</h4>
+        <p>Qué tan turbia está el agua. Se mide en NTU. Valores por encima de <strong>25 NTU</strong> son preocupantes para agua de consumo.</p>
+      </div>
+      <div class="edu-item">
+        <h4>⚡ Conductividad</h4>
+        <p>Cantidad de sales y minerales disueltos (µS/cm). Valores muy altos pueden indicar contaminación minera o industrial.</p>
+      </div>
+      <div class="edu-item">
+        <h4>🌡️ Temperatura</h4>
+        <p>El agua fuera de rango afecta la biodiversidad acuática y favorece el crecimiento de bacterias y algas dañinas.</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <p>AquaSense · Datos obtenidos de <strong>ANA</strong> y <strong>MINAM</strong> · ECA-Agua: DS N.° 004-2017-MINAM · Proyectos Interdisciplinarios 3, UPC — Mayo 2026</p>
+</footer>
+
+<script>
+const ANOS = [2020,2021,2022,2023,2024,2025,2026];
+
+const IMGS = {
+  rimac:    ["https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/R%C3%ADo_R%C3%ADmac_-_Lima.jpg/1280px-R%C3%ADo_R%C3%ADmac_-_Lima.jpg",null,null,"https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Rio_Rimac_en_Lima.jpg/1280px-Rio_Rimac_en_Lima.jpg",null,null,null],
+  titicaca: ["https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Lake_Titicaca_sunset3.jpg/1280px-Lake_Titicaca_sunset3.jpg",null,null,"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Lake_Titicaca%2C_Bolivia_%2810060076815%29.jpg/1280px-Lake_Titicaca%2C_Bolivia_%2810060076815%29.jpg",null,null,null],
+  mantaro:  ["https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Rio_Mantaro.jpg/1280px-Rio_Mantaro.jpg",null,null,null,null,null,null],
+  chillon:  [null,null,null,null,null,null,null]
+};
+
+const ZONAS = {
+  rimac:{
+    nombre:"Río Rímac",region:"Cuenca baja — Lima",
+    estado:"revisar",estadoLabel:"⚠ REVISAR",badgeClass:"badge-a",
+    fecha:"Junio 2025",fuente:"ANA — PLANEFA 2025",
+    fuenteUrl:"https://www.gob.pe/institucion/ana/noticias/1186653-ana-evalua-la-calidad-del-agua-del-rio-rimac-y-sus-afluentes",
+    nota:"La turbidez supera el límite ECA (25 NTU) en periodos de lluvias. El pH se mantiene dentro del rango permitido.",
+    params:[
+      {label:"pH",value:"7.1 – 8.3",unit:"",pct:70,color:"#16a34a"},
+      {label:"Turbidez",value:"15 – 180",unit:"NTU",pct:72,color:"#d97706"},
+      {label:"Conductividad",value:"350 – 850",unit:"µS/cm",pct:35,color:"#16a34a"},
+      {label:"Temperatura",value:"17 – 22",unit:"°C",pct:45,color:"#16a34a"},
+    ],
+    extras:[
+      {icon:"🏙️",label:"Importancia",val:"Principal fuente de Lima",desc:"Abastece aprox. el 70% del agua de SEDAPAL para Lima Metropolitana"},
+      {icon:"⛏️",label:"Presión principal",val:"Minería y residuos",desc:"Más de 1,185 fuentes contaminantes identificadas por la ANA en su cuenca"},
+      {icon:"📏",label:"Longitud",val:"160 km",desc:"Nace en la Cordillera de La Viuda y desemboca en el Océano Pacífico"},
+      {icon:"🌊",label:"Altitud naciente",val:"5,508 m.s.n.m.",desc:"Laguna Ticticocha, departamento de Lima"},
+    ],
+    historico:{
+      ph:[7.0,7.1,7.2,7.3,7.2,7.1,7.3],
+      turbidez:[120,110,135,150,160,170,180],
+      conductividad:[700,720,740,760,780,820,850],
+      temperatura:[18,18.5,19,19.2,19.5,20,22],
+    }
+  },
+  titicaca:{
+    nombre:"Lago Titicaca",region:"Bahía Interior de Puno",
+    estado:"revisar",estadoLabel:"⚠ REVISAR",badgeClass:"badge-a",
+    fecha:"2023 (ANA — monitoreo binacional)",fuente:"ANA — Monitoreo binacional Titicaca",
+    fuenteUrl:"https://www.ana.gob.pe/noticia/autoridad-nacional-del-agua-difunde-resultados-del-monitoreo-binacional-de-la-calidad-del",
+    nota:"El pH supera ligeramente el límite superior ECA (8.5) por eutrofización. La conductividad es naturalmente alta por la altitud y mineralización del lago.",
+    params:[
+      {label:"pH",value:"8.4 – 9.1",unit:"",pct:90,color:"#d97706"},
+      {label:"Turbidez",value:"5 – 30",unit:"NTU",pct:30,color:"#d97706"},
+      {label:"Conductividad",value:"1100 – 1400",unit:"µS/cm",pct:55,color:"#d97706"},
+      {label:"Temperatura",value:"12 – 16",unit:"°C",pct:30,color:"#16a34a"},
+    ],
+    extras:[
+      {icon:"🌍",label:"Relevancia",val:"Lago navegable más alto del mundo",desc:"A 3,812 m.s.n.m., compartido entre Perú y Bolivia"},
+      {icon:"🌿",label:"Presión principal",val:"Eutrofización y residuos",desc:"Crecimiento excesivo de algas por contaminación urbana en la bahía interior de Puno"},
+      {icon:"📐",label:"Área total",val:"8,372 km²",desc:"Perú tiene el 56% del lago; el restante pertenece a Bolivia"},
+      {icon:"🐟",label:"Biodiversidad",val:"Endémica en riesgo",desc:"Hogar de la rana gigante del Titicaca (Telmatobius culeus), en peligro crítico de extinción"},
+    ],
+    historico:{
+      ph:[8.5,8.6,8.7,8.8,8.9,9.0,9.1],
+      turbidez:[12,14,16,18,22,26,30],
+      conductividad:[1100,1150,1200,1250,1300,1350,1400],
+      temperatura:[14,14,13.5,13.5,13,13,12],
+    }
+  },
+  mantaro:{
+    nombre:"Río Mantaro",region:"Cuenca media — Junín",
+    estado:"peligro",estadoLabel:"🔴 PELIGRO",badgeClass:"badge-r",
+    fecha:"Mayo 2025",fuente:"ANA — Monitoreo 2025-I cuenca Mantaro",
+    fuenteUrl:"https://hytimes.pe/2025/05/15/ana-evalua-calidad-del-agua-en-200-puntos-de-la-cuenca-del-rio-mantaro/",
+    nota:"El pH ácido (por debajo de 6.5) y la turbidez muy elevada son consecuencia directa de la actividad minera en la cuenca, con más de 236 fuentes contaminantes identificadas por la ANA.",
+    params:[
+      {label:"pH",value:"5.8 – 7.2",unit:"",pct:55,color:"#d97706"},
+      {label:"Turbidez",value:"40 – 300",unit:"NTU",pct:90,color:"#dc2626"},
+      {label:"Conductividad",value:"400 – 1200",unit:"µS/cm",pct:50,color:"#d97706"},
+      {label:"Temperatura",value:"14 – 18",unit:"°C",pct:35,color:"#16a34a"},
+    ],
+    extras:[
+      {icon:"⚡",label:"Importancia",val:"Genera el 40% de energía del Perú",desc:"El sistema hidroeléctrico del Mantaro es el más importante del país"},
+      {icon:"⛏️",label:"Presión principal",val:"Actividad minera intensa",desc:"Más de 236 fuentes contaminantes, principalmente de la industria minera de Junín"},
+      {icon:"📏",label:"Longitud",val:"724 km",desc:"Es el río más largo enteramente dentro del territorio peruano"},
+      {icon:"🌱",label:"Uso agrícola",val:"Valle del Mantaro",desc:"Abastece uno de los valles agrícolas más productivos de la sierra peruana"},
+    ],
+    historico:{
+      ph:[6.8,6.5,6.3,6.1,6.0,5.9,5.8],
+      turbidez:[150,180,200,230,260,280,300],
+      conductividad:[600,700,800,900,1000,1100,1200],
+      temperatura:[16,16.5,17,17,17.5,18,18],
+    }
+  },
+  chillon:{
+    nombre:"Río Chillón",region:"Cuenca baja — Lima",
+    estado:"revisar",estadoLabel:"⚠ REVISAR",badgeClass:"badge-a",
+    fecha:"2023 (ANA / Observatorio Chirilu)",fuente:"ANA — Observatorio Chirilu",
+    fuenteUrl:"http://observatoriochirilu.ana.gob.pe/index.php/estado-situacional-de-los-recursos-hidricos/calidad/agua-superficial",
+    nota:"El pH y la conductividad se mantienen en rangos aceptables. La turbidez sube en época de avenidas. La urbanización creciente en la cuenca baja representa un riesgo a futuro.",
+    params:[
+      {label:"pH",value:"7.3 – 8.1",unit:"",pct:65,color:"#16a34a"},
+      {label:"Turbidez",value:"8 – 60",unit:"NTU",pct:45,color:"#d97706"},
+      {label:"Conductividad",value:"280 – 520",unit:"µS/cm",pct:22,color:"#16a34a"},
+      {label:"Temperatura",value:"17 – 21",unit:"°C",pct:43,color:"#16a34a"},
+    ],
+    extras:[
+      {icon:"🏙️",label:"Importancia",val:"Segunda fuente de Lima",desc:"Complementa al Rímac como fuente de agua superficial para SEDAPAL"},
+      {icon:"🏗️",label:"Presión principal",val:"Urbanización y residuos",desc:"El crecimiento urbano en Comas, Carabayllo y Puente Piedra presiona la calidad del agua"},
+      {icon:"📏",label:"Longitud",val:"126 km",desc:"Nace en la laguna Chonta (Canta) y desemboca en el Océano Pacífico"},
+      {icon:"🌾",label:"Uso histórico",val:"Agrícola y doméstico",desc:"Históricamente irrigó los valles agrícolas del norte chico de Lima"},
+    ],
+    historico:{
+      ph:[7.5,7.5,7.6,7.6,7.7,7.8,8.1],
+      turbidez:[20,25,28,32,38,45,60],
+      conductividad:[300,320,340,360,400,450,520],
+      temperatura:[18,18.5,19,19,19.5,20,21],
+    }
+  }
+};
+
+const PNAMES  = ["pH","Turbidez","Conductividad","Temperatura"];
+const PKEYS   = ["ph","turbidez","conductividad","temperatura"];
+const PUNITS  = ["","NTU","µS/cm","°C"];
+const PCOLORS = ["#1a6fc4","#2d9fe3","#0f4d8a","#38bdf8"];
+
+const STATE = {};
+
+// ── RENDER ──
+function renderZona(key, delay){
+  const z = ZONAS[key];
+  if(!STATE[key]) STATE[key]={chartIdx:0,imgIdx:ANOS.length-1,chart:null};
+
+  const paramsHTML = z.params.map(p=>`
+    <div class="param">
+      <div class="param-lbl">${p.label}</div>
+      <div class="param-val">${p.value} <span class="param-unit">${p.unit}</span></div>
+      <div class="param-track"><div class="param-fill" style="width:${p.pct}%;background:${p.color}"></div></div>
+    </div>`).join('');
+
+  const extrasHTML = z.extras.map(e=>`
+    <div class="info-item">
+      <div class="info-item-icon">${e.icon}</div>
+      <div class="info-item-label">${e.label}</div>
+      <div class="info-item-val">${e.val}</div>
+      <div class="info-item-desc">${e.desc}</div>
+    </div>`).join('');
+
+  const lastIdx = ANOS.length-1;
+
+  return `
+  <div class="zona-card" id="card-${key}" style="animation-delay:${delay}s">
+    <div class="zc-header">
+      <div>
+        <div class="zc-title">💧 ${z.nombre}</div>
+        <div class="zc-sub">${z.region} · Datos al: ${z.fecha}</div>
+      </div>
+      <span class="badge ${z.badgeClass}">${z.estadoLabel}</span>
+    </div>
+    <div class="params-grid">${paramsHTML}</div>
+    <div class="zc-nota">📋 ${z.nota}</div>
+    <div class="info-extra">${extrasHTML}</div>
+
+    <div class="gallery-section">
+      <div class="section-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        Vista de la zona por año
+      </div>
+      <div class="gallery-frame" id="gframe-${key}">${buildImg(key,lastIdx)}</div>
+      <div class="gallery-nav">
+        <button class="nav-btn" onclick="gNav('${key}',-1)" id="gprev-${key}" disabled>&#8592;</button>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:.3rem;flex:1">
+          <div class="gallery-dots" id="gdots-${key}">
+            ${ANOS.map((_,i)=>`<div class="gdot${i===lastIdx?' active':''}" onclick="gGoto('${key}',${i})"></div>`).join('')}
+          </div>
+          <div class="gallery-caption" id="gcap-${key}">${imgCap(key,lastIdx)}</div>
+        </div>
+        <button class="nav-btn" onclick="gNav('${key}',1)" id="gnext-${key}" disabled>&#8594;</button>
+      </div>
+    </div>
+
+    <div class="charts-section">
+      <div class="chart-nav">
+        <div class="section-title" style="margin:0">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Histórico 2020 – 2026
+        </div>
+        <div style="display:flex;align-items:center;gap:.8rem">
+          <span class="chart-param-label" id="clabel-${key}">${PNAMES[0]}</span>
+          <div class="chart-arrows">
+            <button class="nav-btn" id="cprev-${key}" onclick="cNav('${key}',-1)" disabled>&#8592;</button>
+            <button class="nav-btn" id="cnext-${key}" onclick="cNav('${key}',1)">&#8594;</button>
+          </div>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="chart-${key}"></canvas></div>
+    </div>
+
+    <div class="zc-footer">
+      <span>Fuente: <a href="${z.fuenteUrl}" target="_blank">${z.fuente}</a></span>
+      <span>ECA-Agua: DS N.° 004-2017-MINAM</span>
+    </div>
+  </div>`;
+}
+
+function buildImg(key,idx){
+  const url=IMGS[key][idx], yr=ANOS[idx];
+  if(url) return `<img src="${url}" alt="${ZONAS[key].nombre} ${yr}" onerror="this.outerHTML='${noImg()}'"><div class="gallery-year-badge">${yr}</div>`;
+  return `<div class="gallery-fallback"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Imagen de ${yr} no disponible</span></div><div class="gallery-year-badge">${yr}</div>`;
+}
+function noImg(){return `<div class='gallery-fallback'><svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5'><rect x='3' y='3' width='18' height='18' rx='2'/></svg><span>No disponible</span></div>`;}
+function imgCap(key,idx){return IMGS[key][idx]?`Imagen referencial — ${ZONAS[key].nombre} ${ANOS[idx]}`:`Sin imagen para ${ANOS[idx]}`;}
+
+// GALERÍA NAV
+function gNav(key,dir){
+  const s=STATE[key]; s.imgIdx=Math.max(0,Math.min(ANOS.length-1,s.imgIdx+dir));
+  gUpdate(key);
+}
+function gGoto(key,idx){STATE[key].imgIdx=idx;gUpdate(key);}
+function gUpdate(key){
+  const s=STATE[key],idx=s.imgIdx;
+  document.getElementById(`gframe-${key}`).innerHTML=buildImg(key,idx);
+  document.getElementById(`gcap-${key}`).textContent=imgCap(key,idx);
+  document.getElementById(`gprev-${key}`).disabled=idx===0;
+  document.getElementById(`gnext-${key}`).disabled=idx===ANOS.length-1;
+  document.querySelectorAll(`#gdots-${key} .gdot`).forEach((d,i)=>d.classList.toggle('active',i===idx));
+}
+
+// GRÁFICA
+function buildChart(key){
+  const s=STATE[key],idx=s.chartIdx,z=ZONAS[key];
+  const ctx=document.getElementById(`chart-${key}`).getContext('2d');
+  if(s.chart) s.chart.destroy();
+  s.chart=new Chart(ctx,{
+    type:'line',
+    data:{
+      labels:ANOS,
+      datasets:[{
+        label:PNAMES[idx],data:z.historico[PKEYS[idx]],
+        borderColor:PCOLORS[idx],backgroundColor:PCOLORS[idx]+'22',
+        borderWidth:2.5,pointRadius:5,pointHoverRadius:7,
+        pointBackgroundColor:'#fff',pointBorderColor:PCOLORS[idx],pointBorderWidth:2,
+        fill:true,tension:0.35
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:c=>`${PNAMES[idx]}: ${c.raw} ${PUNITS[idx]}`}}
+      },
+      scales:{
+        x:{grid:{color:'#eef1f5'},ticks:{font:{family:"'Sora',sans-serif",size:11},color:'#5b7291'}},
+        y:{
+          grid:{color:'#eef1f5'},
+          ticks:{font:{family:"'Sora',sans-serif",size:11},color:'#5b7291'},
+          title:{display:true,text:PUNITS[idx]?`${PNAMES[idx]} (${PUNITS[idx]})`:PNAMES[idx],font:{family:"'Sora',sans-serif",size:11},color:'#5b7291'}
+        }
+      }
+    }
+  });
+}
+
+function cNav(key,dir){
+  const s=STATE[key];
+  s.chartIdx=Math.max(0,Math.min(3,s.chartIdx+dir));
+  document.getElementById(`clabel-${key}`).textContent=PNAMES[s.chartIdx];
+  document.getElementById(`cprev-${key}`).disabled=s.chartIdx===0;
+  document.getElementById(`cnext-${key}`).disabled=s.chartIdx===3;
+  buildChart(key);
+}
+
+// MOSTRAR
+function mostrarZona(){
+  const val=document.getElementById('zonaSelect').value,cont=document.getElementById('resultados');
+  if(!val){cont.innerHTML=`<div class="empty"><svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 2C6 8 3 12.5 3 16a9 9 0 0018 0c0-3.5-3-8-9-14z"/></svg><p>Selecciona una zona para ver los datos.</p></div>`;return;}
+  STATE[val]={chartIdx:0,imgIdx:ANOS.length-1,chart:null};
+  cont.innerHTML=renderZona(val,0);
+  setTimeout(()=>buildChart(val),50);
+}
+function mostrarTodas(){
+  document.getElementById('zonaSelect').value='';
+  const keys=['rimac','titicaca','mantaro','chillon'];
+  keys.forEach(k=>{STATE[k]={chartIdx:0,imgIdx:ANOS.length-1,chart:null};});
+  document.getElementById('resultados').innerHTML=keys.map((k,i)=>renderZona(k,i*.09)).join('');
+  setTimeout(()=>keys.forEach(k=>buildChart(k)),50);
+}
+</script>
+</body>
+</html>
