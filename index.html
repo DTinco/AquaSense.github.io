@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="AquaSense: calidad del agua de las cuencas de Lima con datos oficiales de la ANA, el MINAM y PROHVILLA, traducidos a un semaforo simple. Gratis y sin registro.">
+<title>AquaSense — ¿El agua de tu zona es segura?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Sora:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --tinta:#0a2540; --rio:#0f4d8a; --azul:#1a6fc4; --cielo:#2d9fe3;
+  --papel:#eef4f9; --nieve:#ffffff; --borde:#d7e3f0;
+  --txt:#0d1f33; --sub:#54708f;
+  --verde:#15803d; --verde-b:#dcfce7; --verde-l:#e9f7ee;
+  --ambar:#b45309; --ambar-b:#fef3c7; --ambar-l:#fdf6e3;
+  --rojo:#b91c1c;  --rojo-b:#fee2e2;  --rojo-l:#fdecec;
+  --gris:#64748b;  --gris-b:#e8eef5;
+  --r:16px; --rs:10px;
+  --sombra:0 1px 2px rgba(10,37,64,.06),0 8px 28px rgba(10,37,64,.08);
+  --sombra-s:0 1px 3px rgba(10,37,64,.08);
+  --ancho:1000px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{font-family:'Sora',system-ui,sans-serif;background:var(--papel);color:var(--txt);line-height:1.6;overflow-x:hidden}
+a{color:var(--azul)}
+:focus-visible{outline:3px solid var(--cielo);outline-offset:2px;border-radius:6px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto}}
+
+.wrap{max-width:var(--ancho);margin-inline:auto;padding-inline:1.15rem}
+
+/* ---------- NAV ---------- */
+header.nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--borde)}
+.nav-in{max-width:var(--ancho);margin-inline:auto;padding:.65rem 1.15rem;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.brand{display:flex;align-items:center;gap:.55rem;text-decoration:none;color:var(--tinta)}
+.brand-mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(150deg,var(--rio),var(--cielo));display:grid;place-items:center;flex:none;box-shadow:0 2px 8px rgba(26,111,196,.35)}
+.brand-mark svg{width:19px;height:19px;stroke:#fff;fill:none;stroke-width:2.1}
+.brand-name{font-family:'Fraunces',serif;font-weight:600;font-size:1.32rem;letter-spacing:-.01em}
+.nav-r{display:flex;align-items:center;gap:.7rem}
+.pill{font-size:.7rem;font-weight:600;color:var(--rio);background:#e5effb;padding:.24rem .6rem;border-radius:20px;white-space:nowrap}
+.btn{font-family:inherit;font-weight:600;cursor:pointer;border-radius:var(--rs);border:0;transition:transform .12s ease,box-shadow .2s,background .2s;display:inline-flex;align-items:center;gap:.45rem;text-decoration:none;font-size:.85rem;padding:.55rem 1rem;line-height:1}
+.btn:active{transform:translateY(1px)}
+.btn-line{background:#fff;color:var(--rio);border:1.5px solid var(--borde)}
+.btn-line:hover{border-color:var(--azul);background:#f5f9fd}
+.btn-sol{background:linear-gradient(135deg,var(--azul),var(--cielo));color:#fff;box-shadow:0 3px 12px rgba(26,111,196,.32)}
+.btn-sol:hover{box-shadow:0 5px 18px rgba(26,111,196,.42)}
+.btn-verde{background:linear-gradient(135deg,#166534,#16a34a);color:#fff;box-shadow:0 3px 12px rgba(22,101,52,.3)}
+.btn-verde:hover{box-shadow:0 5px 18px rgba(22,101,52,.42)}
+.btn svg{width:15px;height:15px;flex:none}
+.nav-r .btn-verde .lbl-lg{display:inline}
+
+/* ---------- HERO ---------- */
+.hero{position:relative;background:linear-gradient(165deg,#0a2540 0%,#0f4d8a 52%,#1a6fc4 100%);color:#fff;overflow:hidden;padding:3.3rem 0 5.5rem}
+.hero::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:70px;background:var(--papel);
+  -webkit-mask:radial-gradient(60px 70px at 50% 0,transparent 98%,#000);mask:radial-gradient(60px 70px at 50% 0,transparent 98%,#000);display:none}
+.waves{position:absolute;left:0;right:0;bottom:-2px;width:100%;height:80px;display:block}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:.5rem;font-size:.74rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#bfe0f7;margin-bottom:1rem}
+.hero-eyebrow::before{content:"";width:22px;height:1.5px;background:#7cc3ee}
+.hero h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(2.15rem,6vw,3.6rem);line-height:1.05;letter-spacing:-.02em;max-width:16ch}
+.hero-lead{margin-top:1.05rem;max-width:52ch;color:#d5e6f5;font-size:clamp(.98rem,2.4vw,1.08rem)}
+.hero-lead b{color:#fff;font-weight:600}
+
+/* triada semaforo */
+.triada{margin-top:2rem;display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;max-width:640px}
+.tri{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);border-radius:var(--rs);padding:.8rem .85rem;backdrop-filter:blur(3px)}
+.tri-top{display:flex;align-items:center;gap:.5rem;font-weight:700;font-size:.92rem}
+.tri-dot{width:12px;height:12px;border-radius:50%;flex:none;box-shadow:0 0 0 4px rgba(255,255,255,.12)}
+.tri p{font-size:.76rem;color:#cfe2f2;margin-top:.3rem;line-height:1.45}
+.d-v{background:#4ade80}.d-a{background:#fbbf24}.d-r{background:#f87171}
+
+/* ---------- SELECTOR (flotante) ---------- */
+.panel{position:relative;z-index:5;margin-top:-3.6rem}
+.selector{background:var(--nieve);border:1px solid var(--borde);border-radius:var(--r);box-shadow:var(--sombra);padding:1.3rem 1.35rem}
+.selector h2{font-size:.95rem;font-weight:700;letter-spacing:-.01em;margin-bottom:.15rem}
+.selector .hint{font-size:.8rem;color:var(--sub);margin-bottom:.85rem}
+.sel-row{display:flex;gap:.65rem;flex-wrap:wrap}
+.field{flex:1;min-width:220px;position:relative}
+.field label{position:absolute;top:-.5rem;left:.7rem;background:var(--nieve);padding:0 .35rem;font-size:.68rem;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:.05em}
+select{width:100%;appearance:none;font-family:inherit;font-size:.94rem;color:var(--txt);background:var(--nieve);
+  border:1.5px solid var(--borde);border-radius:var(--rs);padding:.7rem 2.4rem .7rem .85rem;cursor:pointer;transition:border-color .2s}
+select:hover{border-color:#b7cbe0}select:focus{border-color:var(--azul);outline:none;box-shadow:0 0 0 3px rgba(26,111,196,.15)}
+.field::after{content:"";position:absolute;right:1rem;top:calc(50% - 2px);width:9px;height:9px;border-right:2px solid var(--sub);border-bottom:2px solid var(--sub);transform:rotate(45deg);pointer-events:none}
+
+/* filtros */
+.filtros{display:flex;gap:.45rem;flex-wrap:wrap;margin-top:1.1rem;align-items:center}
+.filtros .flabel{font-size:.72rem;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;margin-right:.2rem}
+.chip{font-family:inherit;font-size:.78rem;font-weight:600;padding:.34rem .8rem;border-radius:20px;cursor:pointer;
+  border:1.5px solid var(--borde);background:#fff;color:var(--sub);transition:all .18s;display:inline-flex;align-items:center;gap:.4rem}
+.chip:hover{border-color:#b7cbe0;color:var(--txt)}
+.chip[aria-pressed="true"]{background:var(--tinta);border-color:var(--tinta);color:#fff}
+.chip .cdot{width:8px;height:8px;border-radius:50%}
+
+/* ---------- RESULTADOS ---------- */
+main{padding-bottom:4rem}
+.count{font-size:.82rem;color:var(--sub);margin:1.6rem .2rem .9rem}
+.count b{color:var(--txt)}
+.grid{display:grid;gap:1.15rem}
+
+.card{background:var(--nieve);border:1px solid var(--borde);border-radius:var(--r);box-shadow:var(--sombra-s);overflow:hidden;
+  transition:box-shadow .25s,transform .25s;animation:rise .5s cubic-bezier(.2,.7,.3,1) both}
+.card:hover{box-shadow:var(--sombra);transform:translateY(-2px)}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.card-top{padding:1.15rem 1.3rem;display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;border-bottom:1px solid var(--borde)}
+.card-cuenca{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--azul)}
+.card-name{font-family:'Fraunces',serif;font-weight:600;font-size:1.28rem;line-height:1.15;letter-spacing:-.01em;margin-top:.15rem}
+.card-loc{font-size:.78rem;color:var(--sub);margin-top:.2rem}
+.badge{flex:none;display:inline-flex;align-items:center;gap:.4rem;font-size:.76rem;font-weight:700;padding:.4rem .7rem;border-radius:30px;white-space:nowrap}
+.badge svg{width:14px;height:14px}
+.b-v{background:var(--verde-b);color:var(--verde)}
+.b-a{background:var(--ambar-b);color:var(--ambar)}
+.b-r{background:var(--rojo-b);color:var(--rojo)}
+.b-m{background:var(--gris-b);color:#475569}
+
+/* medidores */
+.gauges{padding:1.1rem 1.3rem;display:grid;gap:1rem}
+.gauge-note{font-size:.72rem;color:var(--sub);display:flex;align-items:center;gap:.4rem;margin-bottom:-.2rem}
+.g{}
+.g-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.35rem}
+.g-name{font-size:.82rem;font-weight:600}
+.g-val{font-family:'Space Mono',monospace;font-size:.86rem;font-weight:700}
+.g-val .u{font-size:.68rem;color:var(--sub);font-weight:400;margin-left:.15rem}
+.track{position:relative;height:12px;border-radius:7px;background:var(--gris-b);overflow:hidden}
+.eca{position:absolute;top:0;bottom:0;background:repeating-linear-gradient(45deg,rgba(21,128,61,.14),rgba(21,128,61,.14) 5px,rgba(21,128,61,.06) 5px,rgba(21,128,61,.06) 10px);border-left:1.5px dashed rgba(21,128,61,.5);border-right:1.5px dashed rgba(21,128,61,.5)}
+.meas{position:absolute;top:0;bottom:0;border-radius:7px;transition:width .7s cubic-bezier(.2,.7,.3,1),left .7s}
+.m-v{background:var(--verde)}.m-a{background:var(--ambar)}.m-r{background:var(--rojo)}
+.g-foot{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:.64rem;color:var(--gris);margin-top:.25rem}
+
+/* panel cualitativo */
+.qual{padding:1.15rem 1.3rem}
+.qual-status{display:inline-flex;align-items:center;gap:.5rem;font-size:.78rem;font-weight:600;color:var(--sub);margin-bottom:.6rem}
+.qual-text{font-size:.9rem;line-height:1.6}
+.qual-gap{margin-top:.85rem;background:var(--papel);border:1px solid var(--borde);border-radius:var(--rs);padding:.7rem .85rem;font-size:.79rem;color:var(--sub);display:flex;gap:.55rem}
+.qual-gap svg{width:16px;height:16px;flex:none;stroke:var(--azul);margin-top:1px}
+
+/* nota + info */
+.nota{margin:0 1.3rem 1.1rem;background:var(--papel);border-radius:var(--rs);padding:.7rem .85rem;font-size:.8rem;color:var(--sub);line-height:1.55}
+.nota b{color:var(--txt)}
+.info{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));border-top:1px solid var(--borde)}
+.info-i{padding:.85rem 1.1rem;border-right:1px solid var(--borde)}
+.info-i:last-child{border-right:0}
+.info-l{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--sub)}
+.info-v{font-size:.83rem;font-weight:600;margin-top:.15rem}
+.info-d{font-size:.72rem;color:var(--sub);margin-top:.1rem;line-height:1.4}
+
+.card-foot{padding:.7rem 1.3rem;background:#f8fbfe;border-top:1px solid var(--borde);display:flex;justify-content:space-between;flex-wrap:wrap;gap:.4rem;font-size:.72rem;color:var(--sub)}
+.card-foot a{font-weight:600;text-decoration:none}
+.card-foot a:hover{text-decoration:underline}
+
+/* vacio */
+.empty{text-align:center;padding:3rem 1rem;color:var(--sub)}
+.empty svg{width:46px;height:46px;stroke:#b7cbe0;fill:none;stroke-width:1.4;margin-bottom:.7rem}
+
+/* ---------- SECCIONES ---------- */
+.sec{margin-top:2.4rem}
+.sec-eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--azul)}
+.sec h2{font-family:'Fraunces',serif;font-weight:600;font-size:1.5rem;letter-spacing:-.01em;margin:.2rem 0 1rem}
+.cardbox{background:var(--nieve);border:1px solid var(--borde);border-radius:var(--r);box-shadow:var(--sombra-s);padding:1.4rem 1.4rem}
+
+/* semaforo explicado */
+.colores{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.9rem}
+.color-i{border-radius:var(--rs);padding:.95rem 1rem;border:1px solid var(--borde)}
+.color-i.v{background:var(--verde-l);border-color:#bfe6cc}
+.color-i.a{background:var(--ambar-l);border-color:#f2dfa8}
+.color-i.r{background:var(--rojo-l);border-color:#f3c9c9}
+.color-h{display:flex;align-items:center;gap:.5rem;font-weight:700;font-size:.92rem}
+.color-i p{font-size:.8rem;color:var(--sub);margin-top:.35rem;line-height:1.5}
+
+/* parametros edu */
+.edu{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.9rem}
+.edu-i{background:var(--papel);border-radius:var(--rs);padding:1rem}
+.edu-h{font-weight:700;font-size:.88rem;display:flex;align-items:center;gap:.5rem}
+.edu-h .em{font-size:1.1rem}
+.edu-i p{font-size:.78rem;color:var(--sub);margin-top:.4rem;line-height:1.55}
+.edu-i .lim{font-family:'Space Mono',monospace;font-size:.72rem;color:var(--rio);font-weight:700}
+
+/* metodologia */
+.metodo p{font-size:.86rem;color:var(--sub);line-height:1.65}
+.metodo p+p{margin-top:.6rem}
+.metodo b{color:var(--txt)}
+.deslinde{margin-top:1rem;font-size:.76rem;color:var(--gris);border-left:3px solid var(--borde);padding-left:.8rem}
+
+/* encuesta */
+.enc{margin-top:2.4rem;background:linear-gradient(135deg,#0b3d2e,#16a34a);border-radius:var(--r);padding:1.5rem 1.6rem;
+  display:flex;align-items:center;justify-content:space-between;gap:1.1rem;flex-wrap:wrap;box-shadow:0 6px 22px rgba(11,61,46,.25)}
+.enc h3{color:#fff;font-family:'Fraunces',serif;font-weight:600;font-size:1.25rem}
+.enc p{color:rgba(255,255,255,.82);font-size:.85rem;margin-top:.2rem;max-width:46ch}
+
+/* ---------- FOOTER ---------- */
+footer{background:var(--tinta);color:#c5d6e8;margin-top:2.8rem;padding:2rem 0 2.2rem}
+.foot-in{display:flex;justify-content:space-between;gap:1.4rem;flex-wrap:wrap;align-items:flex-start}
+.foot-brand{font-family:'Fraunces',serif;font-weight:600;font-size:1.2rem;color:#fff;display:flex;align-items:center;gap:.5rem}
+.foot-brand svg{width:18px;height:18px;stroke:#7cc3ee;fill:none;stroke-width:2.1}
+.foot-txt{font-size:.78rem;line-height:1.7;max-width:52ch}
+.foot-txt b{color:#fff}
+.foot-meta{font-size:.72rem;color:#8fabc9}
+
+/* ---------- RESPONSIVE ---------- */
+@media(max-width:680px){
+  .triada{grid-template-columns:1fr}
+  .info-i{border-right:0;border-bottom:1px solid var(--borde)}
+  .info-i:last-child{border-bottom:0}
+  .nav-r .lbl-lg{display:none}
+  .enc{flex-direction:column;align-items:flex-start}
+  .hero{padding-bottom:4.5rem}
+  .panel{margin-top:-3rem}
+}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-in">
+    <a class="brand" href="#">
+      <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2C6.5 8.5 4 12.6 4 16a8 8 0 0016 0c0-3.4-2.5-7.5-8-14z"/></svg></span>
+      <span class="brand-name">AquaSense</span>
+    </a>
+    <div class="nav-r">
+      <span class="pill">Prototipo · 2026</span>
+      <a class="btn btn-verde" href="https://docs.google.com/forms/d/e/1FAIpQLSdGynCDh-4uaNM21pdDvYa0BjQaElhivOE9vO52Lxo9mdfoRA/viewform" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+        <span class="lbl-lg">Responder encuesta</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <span class="hero-eyebrow">Calidad del agua · Lima</span>
+    <h1>¿El agua de tu zona es segura?</h1>
+    <p class="hero-lead">AquaSense reúne los datos oficiales de la <b>ANA</b>, el <b>MINAM</b> y <b>PROHVILLA</b> sobre los ríos de Lima y los traduce a un semáforo que cualquiera entiende. <b>Gratis, sin registro y con la fuente citada.</b></p>
+    <div class="triada" role="list" aria-label="Significado del semáforo">
+      <div class="tri" role="listitem">
+        <div class="tri-top"><span class="tri-dot d-v"></span>Seguro</div>
+        <p>Los parámetros están dentro del rango que fija el ECA del MINAM.</p>
+      </div>
+      <div class="tri" role="listitem">
+        <div class="tri-top"><span class="tri-dot d-a"></span>Revisar</div>
+        <p>Algún parámetro está en el límite o ligeramente elevado. Precaución.</p>
+      </div>
+      <div class="tri" role="listitem">
+        <div class="tri-top"><span class="tri-dot d-r"></span>Peligro</div>
+        <p>Uno o más parámetros superan el ECA. No apto sin tratamiento.</p>
+      </div>
+    </div>
+  </div>
+  <svg class="waves" viewBox="0 0 1440 80" preserveAspectRatio="none" aria-hidden="true"><path fill="#eef4f9" d="M0 40c120 26 260 26 400 6s280-40 440-30 320 46 440 46 160-14 160-14V80H0z"/></svg>
+</section>
+
+<div class="wrap panel">
+  <div class="selector">
+    <h2>Consulta un punto de monitoreo</h2>
+    <p class="hint">Elige un río o tramo de Lima y mira su estado. También puedes ver todos a la vez.</p>
+    <div class="sel-row">
+      <div class="field">
+        <label for="sel">Punto de monitoreo</label>
+        <select id="sel" aria-label="Punto de monitoreo">
+          <option value="">Selecciona un punto…</option>
+        </select>
+      </div>
+      <button class="btn btn-sol" id="verBtn">Ver punto</button>
+      <button class="btn btn-line" id="todosBtn">Ver todos</button>
+    </div>
+    <div class="filtros" role="group" aria-label="Filtrar por estado">
+      <span class="flabel">Filtrar</span>
+      <button class="chip" data-f="todos" aria-pressed="true">Todos</button>
+      <button class="chip" data-f="seguro" aria-pressed="false"><span class="cdot d-v"></span>Seguro</button>
+      <button class="chip" data-f="revisar" aria-pressed="false"><span class="cdot d-a"></span>Revisar</button>
+      <button class="chip" data-f="peligro" aria-pressed="false"><span class="cdot d-r"></span>Peligro</button>
+      <button class="chip" data-f="monitoreo" aria-pressed="false"><span class="cdot" style="background:#94a3b8"></span>En monitoreo</button>
+    </div>
+  </div>
+</div>
+
+<main class="wrap">
+  <p class="count" id="count" hidden></p>
+  <div class="grid" id="res">
+    <div class="empty">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.5 8.5 4 12.6 4 16a8 8 0 0016 0c0-3.4-2.5-7.5-8-14z"/></svg>
+      <p>Elige un punto arriba, o pulsa <b>Ver todos</b> para explorar las cuencas de Lima.</p>
+    </div>
+  </div>
+
+  <!-- SEMAFORO EXPLICADO -->
+  <section class="sec" id="colores">
+    <span class="sec-eyebrow">Cómo leerlo</span>
+    <h2>¿Qué significa cada color?</h2>
+    <div class="cardbox">
+      <div class="colores">
+        <div class="color-i v">
+          <div class="color-h"><span class="tri-dot d-v"></span>Seguro</div>
+          <p>El agua cumple los Estándares de Calidad Ambiental (ECA-Agua) del MINAM en los parámetros medidos. Aun así, "seguro" se refiere a los parámetros disponibles, no a todos los contaminantes posibles.</p>
+        </div>
+        <div class="color-i a">
+          <div class="color-h"><span class="tri-dot d-a"></span>Revisar</div>
+          <p>Algún parámetro está en el límite o algo por encima del ECA. Suele pasar con la turbidez en época de lluvias. Conviene tomarlo con precaución.</p>
+        </div>
+        <div class="color-i r">
+          <div class="color-h"><span class="tri-dot d-r"></span>Peligro</div>
+          <p>Uno o más parámetros superan claramente el ECA. El agua no es apta para consumo sin un tratamiento adecuado.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUE MIDE -->
+  <section class="sec">
+    <span class="sec-eyebrow">Los cuatro parámetros</span>
+    <h2>¿Qué mide AquaSense?</h2>
+    <div class="cardbox">
+      <div class="edu">
+        <div class="edu-i"><div class="edu-h"><span class="em">🧪</span>pH</div><p>Acidez o alcalinidad del agua. Fuera de rango daña la vida acuática.</p><span class="lim">ECA: 6.5 – 8.5</span></div>
+        <div class="edu-i"><div class="edu-h"><span class="em">💧</span>Turbidez</div><p>Qué tan turbia está el agua, por partículas en suspensión (NTU).</p><span class="lim">ECA: &lt; 25 NTU</span></div>
+        <div class="edu-i"><div class="edu-h"><span class="em">⚡</span>Conductividad</div><p>Sales y minerales disueltos. Valores altos sugieren contaminación.</p><span class="lim">ECA: &lt; 2500 µS/cm</span></div>
+        <div class="edu-i"><div class="edu-h"><span class="em">🌡️</span>Temperatura</div><p>Afecta el oxígeno y favorece bacterias y algas si es muy alta.</p><span class="lim">ECA: 10 – 30 °C</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- METODOLOGIA -->
+  <section class="sec">
+    <span class="sec-eyebrow">De dónde salen los datos</span>
+    <h2>Fuentes y método</h2>
+    <div class="cardbox metodo">
+      <p>Los estados provienen de monitoreos oficiales de la <b>ANA</b> (Administración Local de Agua Chillón-Rímac-Lurín), el <b>Observatorio del Agua</b> con el índice <b>ICA-PE</b>, y <b>PROHVILLA</b> para los Pantanos de Villa. Cada punto cita su fuente y la comparación se hace contra el <b>ECA-Agua (DS N.° 004-2017-MINAM)</b>.</p>
+      <p>La información oficial es fragmentaria: la ANA monitorea decenas de puntos, pero solo publica valores numéricos abiertos para algunos tramos. Donde no hay número por punto, mostramos el <b>estado cualitativo oficial</b> y lo señalamos, en lugar de rellenarlo. Esa transparencia es parte de lo que AquaSense quiere resolver.</p>
+      <p><b>Nota sobre Pantanos de Villa:</b> es un humedal costero salobre, por lo que su conductividad y pH altos son naturales. El estado "Peligro" surge de compararlo con el ECA de agua dulce; se mantiene ese criterio por coherencia, dejando constancia de que un humedal salobre requiere otro marco de referencia.</p>
+      <p class="deslinde">AquaSense es un proyecto universitario, no un organismo oficial. Reúne y traduce datos públicos; para decisiones sanitarias consulta siempre a la autoridad competente.</p>
+    </div>
+  </section>
+
+  <!-- ENCUESTA -->
+  <section class="enc">
+    <div>
+      <h3>¿Qué te pareció AquaSense?</h3>
+      <p>Tu opinión ayuda a mejorar la plataforma. La encuesta toma menos de 3 minutos.</p>
+    </div>
+    <a class="btn btn-line" style="background:#fff" href="https://docs.google.com/forms/d/e/1FAIpQLSdGynCDh-4uaNM21pdDvYa0BjQaElhivOE9vO52Lxo9mdfoRA/viewform" target="_blank" rel="noopener">Responder ahora →</a>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot-in">
+    <div>
+      <div class="foot-brand"><svg viewBox="0 0 24 24"><path d="M12 2C6.5 8.5 4 12.6 4 16a8 8 0 0016 0c0-3.4-2.5-7.5-8-14z"/></svg>AquaSense</div>
+      <p class="foot-txt" style="margin-top:.5rem">Calidad del agua de Lima en lenguaje simple. Datos de <b>ANA</b>, <b>MINAM</b> y <b>PROHVILLA</b>. Referencia: ECA-Agua DS N.° 004-2017-MINAM.</p>
+    </div>
+    <p class="foot-meta">Proyectos Interdisciplinarios 3 · HACS · UTEC<br>Julio 2026 · Prototipo académico</p>
+  </div>
+</footer>
+
+<script>
+"use strict";
+// ECA por parametro: escala del medidor y banda aceptable
+const ECA = {
+  ph:{min:0,max:14,lo:6.5,hi:8.5,unit:""},
+  turb:{min:0,max:200,lo:0,hi:25,unit:"NTU"},
+  cond:{min:0,max:5000,lo:0,hi:2500,unit:"µS/cm"},
+  temp:{min:0,max:40,lo:10,hi:30,unit:"°C"}
+};
+const PLABEL={ph:"pH",turb:"Turbidez",cond:"Conductividad",temp:"Temperatura"};
+
+// s: estado calculado del parametro (v/a/r) segun rango medido vs ECA
+function pst(k,lo,hi){const e=ECA[k];if(lo>=e.lo&&hi<=e.hi)return"v";if(hi<=e.hi*1.35&&lo>=e.lo*0.9)return"a";return"r";}
+
+// 12 puntos de Lima. tipo: 'num' (con rango) | 'ica' | 'mon' | 'insuf'
+const PUNTOS=[
+ {id:"rimac-baja",cuenca:"Cuenca del Rímac",nombre:"Río Rímac",loc:"Cuenca baja · Lima / Callao",estado:"revisar",tipo:"num",
+  fecha:"PLANEFA 2025",fuente:"ANA — PLANEFA 2025",url:"https://www.gob.pe/institucion/ana/noticias/1186653",
+  nota:"La turbidez supera el límite ECA en época de lluvias; el pH y la conductividad se mantienen en rango. El ICA-PE de la ANA califica la parte baja como <b>mala</b> por DBO y coliformes.",
+  params:{ph:[7.1,8.3],turb:[15,180],cond:[350,850],temp:[17,22]},
+  info:[["Importancia","Principal fuente de Lima","Abastece cerca del 70% del agua superficial de la ciudad"],["Presión","Minería y residuos","Más de 1,185 fuentes contaminantes en su cuenca (ANA)"]]},
+
+ {id:"rimac-media",cuenca:"Cuenca del Rímac",nombre:"Río Rímac — cuenca media",loc:"Chosica – Matucana · Lima",estado:"revisar",tipo:"ica",
+  fecha:"Observatorio ANA (ICA-PE)",fuente:"Observatorio del Agua — ANA",url:"https://web2.ana.gob.pe/",
+  qual:"Según el índice oficial ICA-PE de la ANA, la cuenca media presenta <b>calidad regular</b> en época de avenida.",
+  info:[["Rol","Tramo intermedio","Conecta la cabecera andina con la ciudad"]]},
+
+ {id:"rimac-alta",cuenca:"Cuenca del Rímac",nombre:"Río Rímac — cuenca alta",loc:"San Mateo · Huarochirí",estado:"monitoreo",tipo:"mon",
+  fecha:"Punto PLANEFA 2025",fuente:"ANA — PLANEFA 2025",url:"https://www.gob.pe/institucion/ana/noticias/1186653",
+  qual:"Punto de control oficial de la ANA en la cabecera, con influencia minera histórica. Se monitorea, pero no hay valores numéricos abiertos publicados por punto.",
+  info:[["Contexto","Cabecera con minería","Zona de pasivos mineros históricos aguas arriba"]]},
+
+ {id:"huaycoloro",cuenca:"Cuenca del Rímac",nombre:"Quebrada Huaycoloro",loc:"Tributario · Lurigancho",estado:"peligro",tipo:"ica",
+  fecha:"Observatorio ANA (ICA-PE)",fuente:"Observatorio del Agua — ANA",url:"https://web2.ana.gob.pe/",
+  qual:"El ICA-PE de la ANA califica esta quebrada como <b>mala</b> (avenida y estiaje), con niveles altos de <b>cobre, plomo y coliformes termotolerantes</b>. Es uno de los principales focos de contaminación del Rímac.",
+  info:[["Aporte","Carga contaminante","Descarga a la cuenca baja del Rímac"]]},
+
+ {id:"santa-eulalia",cuenca:"Cuenca del Rímac",nombre:"Río Santa Eulalia",loc:"Tributario · Huarochirí",estado:"monitoreo",tipo:"mon",
+  fecha:"Monitoreo ANA (dic. 2025)",fuente:"ANA — monitoreo Rímac/Santa Eulalia",url:"https://www.radionacional.gob.pe/noticias/locales/ana-monitorea-calidad-de-agua-en-los-rios-rimac-y-santa-eulalia",
+  qual:"Tributario que aporta agua de mejor calidad al Rímac y ayuda a regular su caudal. Punto de monitoreo oficial de la ANA, sin valores numéricos abiertos por punto.",
+  info:[["Rol","Regulación","Aporta caudal más limpio al sistema Rímac"]]},
+
+ {id:"ticticocha",cuenca:"Cuenca del Rímac",nombre:"Laguna Ticticocha",loc:"Cabecera · Huarochirí",estado:"monitoreo",tipo:"mon",
+  fecha:"Punto PLANEFA 2025",fuente:"ANA — PLANEFA 2025",url:"https://www.gob.pe/institucion/ana/noticias/1186653",
+  qual:"Laguna de cabecera en la naciente del sistema Rímac, incluida en los puntos de control de la ANA. Sin valores numéricos abiertos por punto.",
+  info:[["Ubicación","Naciente andina","Cabecera de cuenca sobre los 4,000 m s. n. m."]]},
+
+ {id:"chillon-baja",cuenca:"Cuenca del Chillón",nombre:"Río Chillón",loc:"Cuenca baja · Márquez, Callao",estado:"revisar",tipo:"num",
+  fecha:"ANA / Observatorio Chirilu",fuente:"ANA — 16 puntos, Chillón",url:"https://www.gob.pe/institucion/ana/noticias/1193007",
+  nota:"El pH y la conductividad se mantienen aceptables; la turbidez sube en avenidas. La urbanización creciente en la cuenca baja representa un riesgo a futuro.",
+  params:{ph:[7.3,8.1],turb:[8,60],cond:[280,520],temp:[17,21]},
+  info:[["Importancia","Segunda fuente de Lima","Complementa al Rímac como agua superficial"],["Presión","Urbanización","Comas, Carabayllo y Puente Piedra presionan la calidad"]]},
+
+ {id:"chillon-alta",cuenca:"Cuenca del Chillón",nombre:"Río Chillón — cuenca alta",loc:"Canta · Lima",estado:"monitoreo",tipo:"insuf",
+  fecha:"Dato oficial limitado",fuente:"Observatorio del Agua — ANA",url:"https://web2.ana.gob.pe/",
+  qual:"La ANA señala escaso monitoreo en la parte media y alta del Chillón: es un <b>vacío de información oficial</b>. AquaSense lo muestra en lugar de ocultarlo.",
+  info:[["Ubicación","Naciente en Canta","Desde la quebrada Torocha, sobre 4,000 m s. n. m."]]},
+
+ {id:"lurin-baja",cuenca:"Cuenca del Lurín",nombre:"Río Lurín",loc:"Cuenca baja · Lima Sur",estado:"revisar",tipo:"num",
+  fecha:"Monitoreo ANA 2026",fuente:"ANA — cuenca Lurín 2026",url:"https://www.gob.pe/institucion/ana/noticias/1367663",
+  nota:"La cuenca alta muestra mejor calidad general. En la cuenca baja la ANA identificó en 2026 unas <b>20 fuentes</b> que requieren atención: botaderos de residuos y descargas domésticas.",
+  params:{ph:[7.2,8.3],turb:[5,45],cond:[150,420],temp:[15,22]},
+  info:[["Carácter","La más conservada","Cuenca menos intervenida de las tres de Lima"],["Presión","Botaderos y descargas","20 fuentes por atender en la parte baja (ANA 2026)"]]},
+
+ {id:"lurin-alta",cuenca:"Cuenca del Lurín",nombre:"Río Lurín — cuenca alta",loc:"San Damián · Huarochirí",estado:"monitoreo",tipo:"insuf",
+  fecha:"Dato oficial limitado",fuente:"ANA — cuenca Lurín 2026",url:"https://www.gob.pe/institucion/ana/noticias/1367663",
+  qual:"La parte alta del Lurín tiene monitoreo limitado. Se reconoce como un punto de la red de la ANA, pero sin valores numéricos abiertos por punto.",
+  info:[["Ubicación","Naciente en San Damián","Cabecera de la cuenca del Lurín"]]},
+
+ {id:"tuctococha",cuenca:"Cuenca del Lurín",nombre:"Laguna Tuctococha",loc:"Cabecera · San Damián",estado:"monitoreo",tipo:"mon",
+  fecha:"Monitoreo ANA 2026",fuente:"ANA — cuenca Lurín 2026",url:"https://www.gob.pe/institucion/ana/noticias/1367663",
+  qual:"Laguna de cabecera incluida en el monitoreo 2026 de la cuenca del Lurín (nueve puntos de San Damián a la desembocadura). Sin valores numéricos abiertos por punto.",
+  info:[["Rol","Reserva de cabecera","Punto de control en la naciente del Lurín"]]},
+
+ {id:"pantanos",cuenca:"Humedal costero",nombre:"Pantanos de Villa",loc:"Humedal · Chorrillos",estado:"peligro",tipo:"num",
+  fecha:"PROHVILLA",fuente:"PROHVILLA / MML",url:"https://datosabiertos.munlima.gob.pe/",
+  nota:"Humedal costero <b>salobre</b>: su conductividad y pH altos son naturales. El estado 'Peligro' surge de compararlo con el ECA de agua dulce; un humedal salobre requiere otro marco de referencia (ver Fuentes y método).",
+  params:{ph:[8.5,9.1],turb:[10,35],cond:[1413,4644],temp:[18,24]},
+  info:[["Valor","Área natural protegida","Refugio de aves y humedal urbano de Lima"],["Carácter","Agua salobre","Alta conductividad natural por cercanía al mar"]]}
+];
+
+// ---------- iconos estado ----------
+const ICON={
+ seguro:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>',
+ revisar:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 9v4m0 4h.01M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L14.4 3.9a2 2 0 00-3.4 0z"/></svg>',
+ peligro:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 8v5m0 3h.01M7.9 2h8.2L22 7.9v8.2L16.1 22H7.9L2 16.1V7.9z"/></svg>',
+ monitoreo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>'
+};
+const BADGECLS={seguro:"b-v",revisar:"b-a",peligro:"b-r",monitoreo:"b-m"};
+const BADGETXT={seguro:"Seguro",revisar:"Revisar",peligro:"Peligro",monitoreo:"En monitoreo"};
+const ICONKEY=e=>e==="seguro"?"seguro":e==="revisar"?"revisar":e==="peligro"?"peligro":"monitoreo";
+
+function pct(k,v){const e=ECA[k];return Math.max(0,Math.min(100,(v-e.min)/(e.max-e.min)*100));}
+
+function gaugeHTML(p){
+  const note='<div class="gauge-note"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M4 20h16M4 20V10m5 10V6m5 14v-8m5 8V4"/></svg> Rango medido frente al límite ECA (banda verde)</div>';
+  const rows=Object.keys(p.params).map(k=>{
+    const [lo,hi]=p.params[k],e=ECA[k],s=pst(k,lo,hi);
+    const ecaL=pct(k,e.lo),ecaW=pct(k,e.hi)-pct(k,e.lo);
+    const mL=pct(k,lo),mW=Math.max(3,pct(k,hi)-pct(k,lo));
+    const val=lo===hi?lo:`${lo} – ${hi}`;
+    return `<div class="g">
+      <div class="g-head"><span class="g-name">${PLABEL[k]}</span><span class="g-val">${val}<span class="u">${e.unit}</span></span></div>
+      <div class="track" role="img" aria-label="${PLABEL[k]}: ${val} ${e.unit}. Límite ECA ${e.lo}-${e.hi}.">
+        <span class="eca" style="left:${ecaL}%;width:${ecaW}%"></span>
+        <span class="meas m-${s}" style="left:${mL}%;width:0" data-w="${mW}"></span>
+      </div>
+      <div class="g-foot"><span>${e.min}</span><span>ECA ${e.lo>e.min?e.lo+"–":"< "}${e.hi}${e.unit?" "+e.unit:""}</span><span>${e.max}</span></div>
+    </div>`;
+  }).join("");
+  return `<div class="gauges">${note}${rows}</div>`;
+}
+
+function qualHTML(p){
+  const gap = (p.tipo==="mon"||p.tipo==="insuf")
+   ? `<div class="qual-gap"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
+      Punto oficialmente monitoreado sin valores numéricos públicos por parámetro. Mostramos su estado y la fuente; el vacío de datos es real y por eso se señala.</div>` : "";
+  return `<div class="qual">
+    <div class="qual-status">${ICON[ICONKEY(p.estado)]} Estado según fuente oficial</div>
+    <p class="qual-text">${p.qual}</p>${gap}</div>`;
+}
+
+function infoHTML(p){
+  if(!p.info||!p.info.length)return"";
+  return `<div class="info">${p.info.map(i=>`<div class="info-i"><div class="info-l">${i[0]}</div><div class="info-v">${i[1]}</div><div class="info-d">${i[2]}</div></div>`).join("")}</div>`;
+}
+
+function cardHTML(p,i){
+  const body = p.tipo==="num" ? gaugeHTML(p) : qualHTML(p);
+  const nota = (p.tipo==="num"&&p.nota) ? `<div class="nota">📋 ${p.nota}</div>` : "";
+  return `<article class="card" id="c-${p.id}" style="animation-delay:${i*0.05}s">
+    <div class="card-top">
+      <div>
+        <div class="card-cuenca">${p.cuenca}</div>
+        <h3 class="card-name">${p.nombre}</h3>
+        <div class="card-loc">${p.loc}</div>
+      </div>
+      <span class="badge ${BADGECLS[ICONKEY(p.estado)]}">${ICON[ICONKEY(p.estado)]}${BADGETXT[ICONKEY(p.estado)]}</span>
+    </div>
+    ${body}${nota}${infoHTML(p)}
+    <div class="card-foot">
+      <span>Fuente: <a href="${p.url}" target="_blank" rel="noopener">${p.fuente}</a> · ${p.fecha}</span>
+      <span>ECA-Agua DS 004-2017-MINAM</span>
+    </div>
+  </article>`;
+}
+
+// animar medidores al renderizar
+function animate(scope){
+  requestAnimationFrame(()=>{
+    (scope||document).querySelectorAll(".meas").forEach(m=>{m.style.width=m.dataset.w+"%";});
+  });
+}
+
+const res=document.getElementById("res");
+const sel=document.getElementById("sel");
+const countEl=document.getElementById("count");
+let filtro="todos";
+
+// poblar select agrupado por cuenca
+(function(){
+  const grupos={};PUNTOS.forEach(p=>{(grupos[p.cuenca]=grupos[p.cuenca]||[]).push(p);});
+  Object.keys(grupos).forEach(c=>{
+    const og=document.createElement("optgroup");og.label=c;
+    grupos[c].forEach(p=>{const o=document.createElement("option");o.value=p.id;o.textContent=p.nombre.replace(p.cuenca,"").trim();og.appendChild(o);});
+    sel.appendChild(og);
+  });
+})();
+
+function estadoKey(p){return ICONKEY(p.estado);}
+function matchFiltro(p){return filtro==="todos"||estadoKey(p)===filtro;}
+
+function pintar(lista){
+  if(!lista.length){res.innerHTML=`<div class="empty"><svg viewBox="0 0 24 24"><path d="M12 2C6.5 8.5 4 12.6 4 16a8 8 0 0016 0c0-3.4-2.5-7.5-8-14z"/></svg><p>No hay puntos con ese estado.</p></div>`;countEl.hidden=true;return;}
+  res.innerHTML=lista.map((p,i)=>cardHTML(p,i)).join("");
+  countEl.hidden=false;countEl.innerHTML=`Mostrando <b>${lista.length}</b> de <b>${PUNTOS.length}</b> puntos de monitoreo de Lima.`;
+  animate(res);
+}
+
+document.getElementById("verBtn").addEventListener("click",()=>{
+  const v=sel.value;if(!v)return;
+  const p=PUNTOS.find(x=>x.id===v);
+  res.innerHTML=cardHTML(p,0);countEl.hidden=true;animate(res);
+  res.scrollIntoView({behavior:"smooth",block:"start"});
+});
+document.getElementById("todosBtn").addEventListener("click",()=>{
+  filtro="todos";syncChips();sel.value="";pintar(PUNTOS);
+});
+sel.addEventListener("change",()=>{if(sel.value)document.getElementById("verBtn").click();});
+
+const chips=[...document.querySelectorAll(".chip")];
+function syncChips(){chips.forEach(c=>c.setAttribute("aria-pressed",c.dataset.f===filtro));}
+chips.forEach(c=>c.addEventListener("click",()=>{
+  filtro=c.dataset.f;syncChips();sel.value="";
+  pintar(PUNTOS.filter(matchFiltro));
+}));
+</script>
+</body>
+</html>
